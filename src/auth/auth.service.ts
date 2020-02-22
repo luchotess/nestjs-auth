@@ -1,7 +1,12 @@
-import { Injectable } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
-import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { UsersService }                          from '../users/users.service';
+import { JwtService }                            from '@nestjs/jwt';
+import * as bcrypt                               from 'bcrypt';
+
+export interface CredenditalsDTO {
+    username: string;
+    password: string;
+}
 
 @Injectable()
 export class AuthService {
@@ -10,15 +15,18 @@ export class AuthService {
         private readonly jwtService: JwtService
     ) {}
 
-    async validateUser (username: string, pass: string): Promise<any> {
-        const user = await this.usersService.findOne(username);
+    async validateUser ({username = '', password = ''}: CredenditalsDTO): Promise<any> {
+        const user = await this.usersService.findOne({username});
 
-        if (user && await bcrypt.compare(pass, user.password)) {
-            const { password, ...result } = user;
-            return result;
+        if (!user) {
+            throw new HttpException({error: 'Username not found.'}, HttpStatus.FORBIDDEN);
         }
 
-        return null;
+        if (!await user.validatePassword(password)) {
+            throw new HttpException({error: 'Incorrect password.'}, HttpStatus.FORBIDDEN);
+        }
+
+        return user.serialize();
     }
 
     async login (user: any) {
