@@ -1,9 +1,10 @@
-import { Model } from 'mongoose';
-import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
+import { Model }                                 from 'mongoose';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class BaseDto {
-    constructor (private readonly model: Model<any>) {}
+    constructor (private readonly model: Model<any>) {
+    }
 
     requiredFields: string[] = [];
 
@@ -29,12 +30,16 @@ export class BaseDto {
         return await this.model.findOne(condition).exec();
     }
 
+    async findCondition (condition): Promise<any> {
+        return await this.model.find(condition).exec();
+    }
+
     async update (_id: string, DTO: any): Promise<any> {
-        return await this.model.findOneAndUpdate({_id}, DTO, {new: true}).exec();
+        return await this.model.findOneAndUpdate({ _id }, DTO, { new: true }).exec();
     }
 
     async delete (_id: string): Promise<any> {
-        const deleted = await this.model.findOneAndDelete({_id}).exec();
+        const deleted = await this.model.findOneAndDelete({ _id }).exec();
 
         if (deleted) {
             return {
@@ -42,7 +47,7 @@ export class BaseDto {
                 deleted: deleted._id
             };
         } else {
-            throw new HttpException({error: 'Error deleting from the database.'}, HttpStatus.BAD_REQUEST);
+            throw new HttpException({ error: 'Error deleting from the database.' }, HttpStatus.BAD_REQUEST);
         }
     }
 }

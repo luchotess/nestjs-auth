@@ -6,7 +6,8 @@ export const UserSchema = new mongoose.Schema({
     username: String,
     password: String,
     role: String,
-    name: String,
+    firstName: String,
+    lastName: String,
 });
 
 UserSchema.methods.validatePassword = function (password) {
@@ -50,7 +51,8 @@ export type CreateUserDto = {
     username: string;
     password: string;
     role: string;
-    name: string;
+    firstName: string;
+    lastName: string;
 };
 
 export type User = any;
